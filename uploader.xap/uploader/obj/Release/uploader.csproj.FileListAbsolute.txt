@@ -1,0 +1,13 @@
+C:\Users\NN5\Desktop\uploader\uploader.xap\uploader\uploader\Bin\Release\uploader.dll
+C:\Users\NN5\Desktop\uploader\uploader.xap\uploader\uploader\Bin\Release\uploader.pdb
+C:\Users\NN5\Desktop\uploader\uploader.xap\uploader\uploader\Bin\Release\AppManifest.xaml
+C:\Users\NN5\Desktop\uploader\uploader.xap\uploader\uploader\Bin\Release\uploader.xap
+C:\Users\NN5\Desktop\uploader\uploader.xap\uploader\uploader\Bin\Release\uploaderTestPage.html
+C:\Users\NN5\Desktop\uploader\uploader.xap\uploader\uploader\obj\Release\ResolveAssemblyReference.cache
+C:\Users\NN5\Desktop\uploader\uploader.xap\uploader\uploader\obj\Release\App.g.cs
+C:\Users\NN5\Desktop\uploader\uploader.xap\uploader\uploader\obj\Release\MainPage.g.cs
+C:\Users\NN5\Desktop\uploader\uploader.xap\uploader\uploader\obj\Release\UploaderControl.g.cs
+C:\Users\NN5\Desktop\uploader\uploader.xap\uploader\uploader\obj\Release\uploader.g.resources
+C:\Users\NN5\Desktop\uploader\uploader.xap\uploader\uploader\obj\Release\uploader.dll
+C:\Users\NN5\Desktop\uploader\uploader.xap\uploader\uploader\obj\Release\uploader.pdb
+C:\Users\NN5\Desktop\uploader\uploader.xap\uploader\uploader\obj\Release\XapCacheFile.xml

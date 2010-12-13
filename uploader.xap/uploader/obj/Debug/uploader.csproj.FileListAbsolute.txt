@@ -1,0 +1,13 @@
+C:\Users\NN5\Desktop\uploader\uploader.xap\uploader\uploader\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\NN5\Desktop\uploader\uploader.xap\uploader\uploader\obj\Debug\App.g.cs
+C:\Users\NN5\Desktop\uploader\uploader.xap\uploader\uploader\obj\Debug\MainPage.g.cs
+C:\Users\NN5\Desktop\uploader\uploader.xap\uploader\uploader\obj\Debug\UploaderControl.g.cs
+C:\Users\NN5\Desktop\uploader\uploader.xap\uploader\uploader\obj\Debug\uploader.g.resources
+C:\Users\NN5\Desktop\uploader\uploader.xap\uploader\uploader\Bin\Debug\uploader.dll
+C:\Users\NN5\Desktop\uploader\uploader.xap\uploader\uploader\Bin\Debug\uploader.pdb
+C:\Users\NN5\Desktop\uploader\uploader.xap\uploader\uploader\Bin\Debug\AppManifest.xaml
+C:\Users\NN5\Desktop\uploader\uploader.xap\uploader\uploader\Bin\Debug\uploader.xap
+C:\Users\NN5\Desktop\uploader\uploader.xap\uploader\uploader\Bin\Debug\uploaderTestPage.html
+C:\Users\NN5\Desktop\uploader\uploader.xap\uploader\uploader\obj\Debug\uploader.dll
+C:\Users\NN5\Desktop\uploader\uploader.xap\uploader\uploader\obj\Debug\uploader.pdb
+C:\Users\NN5\Desktop\uploader\uploader.xap\uploader\uploader\obj\Debug\XapCacheFile.xml

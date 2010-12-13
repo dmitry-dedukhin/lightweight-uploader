@@ -1,0 +1,5 @@
+C:\Users\NN5\Desktop\uploader\uploader.xap\uploader\uploader.Web\bin\uploader.Web.dll
+C:\Users\NN5\Desktop\uploader\uploader.xap\uploader\uploader.Web\bin\uploader.Web.pdb
+C:\Users\NN5\Desktop\uploader\uploader.xap\uploader\uploader.Web\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\NN5\Desktop\uploader\uploader.xap\uploader\uploader.Web\obj\Debug\uploader.Web.dll
+C:\Users\NN5\Desktop\uploader\uploader.xap\uploader\uploader.Web\obj\Debug\uploader.Web.pdb
