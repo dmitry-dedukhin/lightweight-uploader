@@ -98,10 +98,16 @@ var adler32 = function(data) {
 };
 
 // main object
-lu = {
+lwu = {
 	instances: {}, // uploader instances
 	idx: 0, // uploader instance counter
 	t: t, // make trace method available outside
+	ERROR_CODES: {
+		HTTP_ERROR: 1,
+		IO_ERROR: 2,
+		SEQURITY_ERROR: 3,
+		OTHER_ERROR: 4
+	},
 	mime2ext: { // default mapping of mime types to extensions
 		image:			['jpg', 'jpeg', 'bmp', 'gif', 'png', 'tiff', 'ico'],
 		audio:			['mp3', 'wma', 'wav', 'ogg', 'mid'],
@@ -121,8 +127,8 @@ lu = {
 	// main uploader object
 	uploader: function(opts) {
 		var oself = this;
-		lu.instances[++lu.idx] = this;
-		lu.uploader.superclass.constructor.apply(oself, [
+		lwu.instances[++lwu.idx] = this;
+		lwu.uploader.superclass.constructor.apply(oself, [
 			'onInit',
 			'onSelect',
 			'onStart',
@@ -153,7 +159,7 @@ lu = {
 		var UPLOAD_FAILED = 5;
 
 		oself.addFE = function(fe) {
-			fe.uploader_idx = lu.idx;
+			fe.uploader_idx = lwu.idx;
 			fe.frontend_idx = oself.frontends.length;
 			fe.html_obj_id = fe.codename + '_uploader_' + fe.uploader_idx;
 			fe.set({
@@ -177,8 +183,8 @@ lu = {
 				oself.broadcast('onDone', fo, rsp);
 				fo.state = UPLOAD_DONE;
 				oself.startNextUpload();
-			}).bind('onError', function(fo) {
-				oself.broadcast('onError', fo);
+			}).bind('onError', function(fo, code) {
+				oself.broadcast('onError', fo, code);
 				fo.state = UPLOAD_FAILED;
 				oself.startNextUpload();
 			}).bind('onPrepared', function(fo) { // internal event
@@ -271,7 +277,7 @@ lu = {
 	}
 };
 
-inherit(lu.uploader, baseObject);
+inherit(lwu.uploader, baseObject);
 
 /*
  * upFE (upload frontend) is an abstract class, each real frontend should inherit from it
@@ -436,7 +442,7 @@ var upFE_html5 = function(opts) {
 			var filters = oself.opts.accept.split(',');
 			for(var i in filters) {
 				var mime = filters[i].replace(/\s+/, '');
-				if(lu.mime2ext[mime]) {
+				if(lwu.mime2ext[mime]) {
 					accept.push(mime);
 				}
 			}
@@ -495,7 +501,7 @@ var upFE_html5 = function(opts) {
 			var timeout = oself.opts.retryTimeoutBase * (oself.opts.maxChunkRetries - fo.retry);
 			setTimeout(function(){oself.uploadFile(fo)}, timeout);
 		} else {
-			oself.broadcast('onError', fo);
+			oself.broadcast('onError', fo. lwu.ERROR_CODES.OTHER_ERROR);
 		}
 	};
 	oself.uploadFile = function(fo) {
@@ -534,6 +540,7 @@ var upFE_html5 = function(opts) {
 		fo.xhr.setRequestHeader('Content-Disposition', 'attachment; filename="' + fo.name + '\"');
 		fo.xhr.setRequestHeader('Content-Range', 'bytes ' + fo.currentChunkStartPos + '-' + fo.currentChunkEndPos + '/' + fo.size);
 		fo.xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+		fo.xhr.withCredentials = true; // allow cookies to be sent
 		fo.xhr.send(blob);
 	};
 	oself.calcNextChunkRange = function(fo) {
@@ -634,7 +641,7 @@ var upFE_html5 = function(opts) {
 	return oself;
 };
 inherit(upFE_html5, upFE);
-lu.upFE_html5 = upFE_html5;
+lwu.upFE_html5 = upFE_html5;
 
 // common class for plugin frontends
 var upFE_plugin = function() {
@@ -661,7 +668,7 @@ upFE_plugin.prototype.onDone = function(id, rsp) {
 	this.broadcast('onDone', this.getFile(id), rsp);
 };
 upFE_plugin.prototype.onError = function(id, errorCode, errorText) {
-	this.broadcast('onError', this.getFile(id));
+	this.broadcast('onError', this.getFile(id), errorCode);
 };
 upFE_plugin.prototype.startUpload = function(id, url, data) {
 	this.broadcast('onStart', this.getFile(id));
@@ -688,7 +695,7 @@ upFE_plugin.prototype.getAcceptString = function() {
 	if(this.opts.accept) {
 		var filters = this.opts.accept.split(',');
 		for(var i in filters) {
-			var ext = lu.mime2ext[filters[i]];
+			var ext = lwu.mime2ext[filters[i]];
 			for(var j in ext) {
 				ext[j] = '*.' + ext[j];
 			}
@@ -713,7 +720,7 @@ var upFE_flash = function(opts) {
 	oself.insert = function() {
 		oself.opts.container.innerHTML += '<object id="' + oself.html_obj_id + '" type="application/x-shockwave-flash" data="' + oself.opts.plugin_url + '" width="' + oself.opts.width + '" height="' + oself.opts.height + '">' +
 			'<param name="movie" value="' + oself.opts.plugin_url + '" />' +
-			'<param name="flashvars" value="uploaderID=' + oself.uploader_idx + '&frontentID=' + oself.frontend_idx + '&htmlProxyName=lu&browseText=' + oself.opts.buttonText + '&buttonURL=' + oself.opts.buttonURL + '&accept=' + oself.getAcceptString() + '" />' +
+			'<param name="flashvars" value="uploaderID=' + oself.uploader_idx + '&frontentID=' + oself.frontend_idx + '&htmlProxyName=lwu&browseText=' + oself.opts.buttonText + '&buttonURL=' + oself.opts.buttonURL + '&accept=' + oself.getAcceptString() + '" />' +
 			'<param name="allowscriptaccess" value="always" />' +
 			'</object>';
 	};
@@ -739,7 +746,7 @@ var upFE_flash = function(opts) {
 	};
 };
 inherit(upFE_flash, upFE_plugin);
-lu.upFE_flash = upFE_flash;
+lwu.upFE_flash = upFE_flash;
 
 // silverlight frontend
 var upFE_silverlight = function(opts) {
@@ -756,7 +763,7 @@ var upFE_silverlight = function(opts) {
 			'<param name="source" value="' + oself.opts.plugin_url + '" />' +
 			'<param name="minRuntimeVersion" value="' + nver + '" />' +
 			'<param name="autoUpgrade" value="true" />' +
-			'<param name="initParams" value="uploaderID=' + oself.uploader_idx + ',frontentID=' + oself.frontend_idx + ',htmlProxyName=lu,browseText=' + oself.opts.buttonText + ',buttonURL=' + oself.opts.buttonURL + ',accept=' + oself.getAcceptString() + '" />' +
+			'<param name="initParams" value="uploaderID=' + oself.uploader_idx + ',frontentID=' + oself.frontend_idx + ',htmlProxyName=lwu,browseText=' + oself.opts.buttonText + ',buttonURL=' + oself.opts.buttonURL + ',accept=' + oself.getAcceptString() + '" />' +
 			'</object>';
 	};
 	oself.isFEAvailable = function() {
@@ -785,8 +792,8 @@ var upFE_silverlight = function(opts) {
 	};
 };
 inherit(upFE_silverlight, upFE_plugin);
-lu.upFE_silverlight = upFE_silverlight;
+lwu.upFE_silverlight = upFE_silverlight;
 
-return lu;
+return lwu;
 
 })(window);
