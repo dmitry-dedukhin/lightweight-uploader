@@ -431,7 +431,7 @@ var upFE_html5 = function(opts) {
 	};
 
 	oself.isFEAvailable = function() {
-		if(wnd.File && wnd.FileList && wnd.Blob) {
+		if(wnd.File && wnd.FileList && (wnd.Blob || wnd.FormData)) {
 			return true;
 		}
 		return false;
@@ -506,7 +506,14 @@ var upFE_html5 = function(opts) {
 	};
 	oself.uploadFile = function(fo) {
 		oself.calcNextChunkRange(fo);
-		var blob = fo.slice(fo.currentChunkStartPos, fo.currentChunkEndPos - fo.currentChunkStartPos + 1);
+		var blob, simple_upload = 0;
+		try {
+			blob = fo.slice(fo.currentChunkStartPos, fo.currentChunkEndPos - fo.currentChunkStartPos + 1);
+		} catch(e) { // Safari doesn't support Blob.slice method
+			blob = new FormData();
+			blob.append('Filedata', fo);
+			simple_upload = 1;
+		};
 		fo.xhr = new XMLHttpRequest();
 		fo.xhr.onreadystatechange = function() {
 			if(this.readyState == 4) {
@@ -536,10 +543,17 @@ var upFE_html5 = function(opts) {
 			}
 		};
 		fo.xhr.open("POST", fo.full_url, true);
-		fo.xhr.setRequestHeader('Session-ID', fo.sessionID);
-		fo.xhr.setRequestHeader('Content-Disposition', 'attachment; filename="' + fo.name + '\"');
-		fo.xhr.setRequestHeader('Content-Range', 'bytes ' + fo.currentChunkStartPos + '-' + fo.currentChunkEndPos + '/' + fo.size);
-		fo.xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+		if(!simple_upload) {
+			fo.xhr.setRequestHeader('Session-ID', fo.sessionID);
+			fo.xhr.setRequestHeader('Content-Disposition', 'attachment; filename="' + fo.name + '\"');
+			fo.xhr.setRequestHeader('Content-Range', 'bytes ' + fo.currentChunkStartPos + '-' + fo.currentChunkEndPos + '/' + fo.size);
+			fo.xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+		} else {
+			fo.xhr.upload.onprogress = function(evt) {
+				fo.loaded = evt.position || evt.loaded;
+				oself.broadcast('onProgress', fo);
+			};
+		}
 		fo.xhr.withCredentials = true; // allow cookies to be sent
 		fo.xhr.send(blob);
 	};
