@@ -545,7 +545,7 @@ var upFE_html5 = function(opts) {
 		fo.xhr.open("POST", fo.full_url, true);
 		if(!simple_upload) {
 			fo.xhr.setRequestHeader('Session-ID', fo.sessionID);
-			fo.xhr.setRequestHeader('Content-Disposition', 'attachment; filename="' + fo.name + '\"');
+			fo.xhr.setRequestHeader('Content-Disposition', 'attachment; filename="' + encodeURI(fo.name) + '\"');
 			fo.xhr.setRequestHeader('Content-Range', 'bytes ' + fo.currentChunkStartPos + '-' + fo.currentChunkEndPos + '/' + fo.size);
 			fo.xhr.setRequestHeader('Content-Type', 'application/octet-stream');
 		} else {
