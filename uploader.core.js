@@ -543,16 +543,15 @@ var upFE_html5 = function(opts) {
 			}
 		};
 		fo.xhr.open("POST", fo.full_url, true);
+		fo.xhr.upload.onprogress = function(evt) {
+			fo.loaded = (simple_upload ? 0 : fo._loaded) + evt.loaded;
+			oself.broadcast('onProgress', fo);
+		};
 		if(!simple_upload) {
 			fo.xhr.setRequestHeader('Session-ID', fo.sessionID);
 			fo.xhr.setRequestHeader('Content-Disposition', 'attachment; filename="' + encodeURI(fo.name) + '\"');
 			fo.xhr.setRequestHeader('Content-Range', 'bytes ' + fo.currentChunkStartPos + '-' + fo.currentChunkEndPos + '/' + fo.size);
 			fo.xhr.setRequestHeader('Content-Type', 'application/octet-stream');
-		} else {
-			fo.xhr.upload.onprogress = function(evt) {
-				fo.loaded = evt.position || evt.loaded;
-				oself.broadcast('onProgress', fo);
-			};
 		}
 		fo.xhr.withCredentials = true; // allow cookies to be sent
 		fo.xhr.send(blob);
@@ -561,7 +560,7 @@ var upFE_html5 = function(opts) {
 		var range = fo.uploadedRange;
 		fo.currentChunkStartPos = 0;
 		fo.currentChunkEndPos = (fo.currentChunkStartPos + fo.chunkSize < fo.size ? fo.currentChunkStartPos + fo.chunkSize : fo.size - 1);
-		fo.loaded = 0;
+		fo.loaded = fo._loaded = 0;
 		if(!range || range.match(/^\d+-\d+\/\d+/)) {
 			var holeStart = 0, holeEnd = 0;
 			var arange = (range ? range.split(',') : []);
@@ -578,6 +577,7 @@ var upFE_html5 = function(opts) {
 					holeStart = end + 1;
 				}
 			}
+			fo._loaded = fo.loaded; // save loaded bytes for smooth progress
 			fo.currentChunkStartPos = holeStart;
 			if (holeEnd == 0) {
 				holeEnd = fo.size - 1;
