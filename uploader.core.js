@@ -519,7 +519,10 @@ var upFE_html5 = function(opts) {
 			if(this.readyState == 4) {
 				try {
 					if(this.status == 201) { // chunk was uploaded succesfully
-						var range = this.getResponseHeader('Range');
+						var range = this.responseText;
+						try { // getResponseHeader throws exception during cross-domain upload, but this is most reliable variant
+							range = this.getResponseHeader('Range');
+						} catch(e) {};
 						if(!range) {
 							throw new Error('No range in 201 answer');
 						}
