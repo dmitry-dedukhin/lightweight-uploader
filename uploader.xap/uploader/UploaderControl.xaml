@@ -4,7 +4,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     mc:Ignorable="d" d:DesignWidth="120" d:DesignHeight="25">
 	<Grid x:Name="LayoutRoot">
-		<Button Click="addFilesButton_Click" x:Name="BrowseButton" FontSize="12" Width="120" Height="25"/>
-		<Image MouseLeftButtonUp="addFilesButton_Click" x:Name="BrowseImage" Stretch="None" Width="120" Height="25"/>
+		<Button Click="addFilesButton_Click" x:Name="BrowseButton" FontSize="12" />
+		<Image MouseLeftButtonUp="addFilesButton_Click" x:Name="BrowseImage" Stretch="None" />
 	</Grid>
 </UserControl>

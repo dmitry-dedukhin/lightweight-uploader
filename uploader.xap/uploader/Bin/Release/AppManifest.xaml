@@ -1,4 +1,4 @@
-﻿<Deployment xmlns="http://schemas.microsoft.com/client/2007/deployment" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" EntryPointAssembly="uploader" EntryPointType="uploader.App" RuntimeVersion="3.0.40818.0">
+﻿<Deployment xmlns="http://schemas.microsoft.com/client/2007/deployment" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" ExternalCallersFromCrossDomain="ScriptableOnly" EntryPointAssembly="uploader" EntryPointType="uploader.App" RuntimeVersion="3.0.40818.0">
   <Deployment.Parts>
     <AssemblyPart x:Name="uploader" Source="uploader.dll" />
   </Deployment.Parts>

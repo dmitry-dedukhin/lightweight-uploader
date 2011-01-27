@@ -779,6 +779,7 @@ var upFE_silverlight = function(opts) {
 		oself.opts.container.innerHTML += '<object id="' + oself.html_obj_id + '" data="data:application/x-silverlight," type="application/x-silverlight-2" width="' + oself.opts.width + '" height="' + oself.opts.height + '">' +
 			'<param name="source" value="' + oself.opts.plugin_url + '" />' +
 			'<param name="minRuntimeVersion" value="' + nver + '" />' +
+			'<param name="enableHtmlAccess" value="true" />' +
 			'<param name="autoUpgrade" value="true" />' +
 			'<param name="initParams" value="uploaderID=' + oself.uploader_idx + ',frontentID=' + oself.frontend_idx + ',htmlProxyName=lwu,browseText=' + oself.opts.buttonText + ',buttonURL=' + oself.opts.buttonURL + ',accept=' + oself.getAcceptString() + '" />' +
 			'</object>';

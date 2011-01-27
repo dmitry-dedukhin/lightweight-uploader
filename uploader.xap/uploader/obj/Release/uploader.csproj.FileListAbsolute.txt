@@ -11,3 +11,16 @@ C:\Users\NN5\Desktop\uploader\uploader.xap\uploader\uploader\obj\Release\uploade
 C:\Users\NN5\Desktop\uploader\uploader.xap\uploader\uploader\obj\Release\uploader.dll
 C:\Users\NN5\Desktop\uploader\uploader.xap\uploader\uploader\obj\Release\uploader.pdb
 C:\Users\NN5\Desktop\uploader\uploader.xap\uploader\uploader\obj\Release\XapCacheFile.xml
+C:\User\GIT\lightweight-uploader\uploader.xap\uploader\Bin\Release\uploader.dll
+C:\User\GIT\lightweight-uploader\uploader.xap\uploader\Bin\Release\uploader.pdb
+C:\User\GIT\lightweight-uploader\uploader.xap\uploader\Bin\Release\AppManifest.xaml
+C:\User\GIT\lightweight-uploader\uploader.xap\uploader\Bin\Release\uploader.xap
+C:\User\GIT\lightweight-uploader\uploader.xap\uploader\Bin\Release\uploaderTestPage.html
+C:\User\GIT\lightweight-uploader\uploader.xap\uploader\obj\Release\ResolveAssemblyReference.cache
+C:\User\GIT\lightweight-uploader\uploader.xap\uploader\obj\Release\App.g.cs
+C:\User\GIT\lightweight-uploader\uploader.xap\uploader\obj\Release\MainPage.g.cs
+C:\User\GIT\lightweight-uploader\uploader.xap\uploader\obj\Release\UploaderControl.g.cs
+C:\User\GIT\lightweight-uploader\uploader.xap\uploader\obj\Release\uploader.g.resources
+C:\User\GIT\lightweight-uploader\uploader.xap\uploader\obj\Release\uploader.dll
+C:\User\GIT\lightweight-uploader\uploader.xap\uploader\obj\Release\uploader.pdb
+C:\User\GIT\lightweight-uploader\uploader.xap\uploader\obj\Release\XapCacheFile.xml
