@@ -9,6 +9,33 @@ var gebi = function(id) {
 	return document.getElementById(id);
 };
 
+var attr = function(elm, props) {
+	if(props && elm) {
+		for(var i in props) {
+			elm.setAttribute(i, props[i]);
+		}
+	}
+};
+
+var css = function(elm, props) {
+	if(props && elm) {
+		for(var i in props) {
+			elm.style[i] = props[i];
+		}
+	}
+};
+
+var createElm = function(tag, props, append_to) {
+	var elm = document.createElement(tag);
+	if(props) {
+		attr(elm, props);
+	}
+	if(append_to) {
+		append_to.appendChild(elm);
+	}
+	return elm;
+};
+
 // inherit one object from another
 var inherit = function (Child, Parent) {
 	var F = function() { };
@@ -437,8 +464,8 @@ var upFE_html5 = function(opts) {
 		return false;
 	};
 	oself.insert = function() {
-		var accept = [];
 		if(oself.opts.accept) {
+			var accept = [];
 			var filters = oself.opts.accept.split(',');
 			for(var i in filters) {
 				var mime = filters[i].replace(/\s+/, '');
@@ -446,18 +473,38 @@ var upFE_html5 = function(opts) {
 					accept.push(mime);
 				}
 			}
+			oself.opts.accept_fixed = accept.join(',');
 		}
-		oself.opts.container.innerHTML += '<div id="' + oself.html_obj_id + '" style="width:' + oself.opts.width + '; height:' + oself.opts.height + '; background:url(' + oself.opts.buttonURL + ')">' + 
-			'<input id="' + oself.html_obj_id + '_input" type=file multiple accept="' + accept.join(',') + '" style="width: 100%; opacity: 0;" />' +
-			'</div>';
-		setTimeout(function() { // defeat Chrome bug, it can not find element right after it was inserted on the page
-			oself.file_elm = gebi(oself.html_obj_id + '_input');
-			oself.div_elm = gebi(oself.html_obj_id);
-			oself.file_elm.onchange = function() {
-				oself.onSelect(this); // 'this' is a DOM object here
-			}
-		}, 1);
+		oself.div_elm = createElm('div', {id: oself.html_obj_id}, oself.opts.container);
+		css(oself.div_elm, {
+			width: oself.opts.width,
+			height: oself.opts.height,
+			backgroundImage: 'url(' + oself.opts.buttonURL + ')'
+		});
+		oself.recreateButton();
 		oself.onFEReady(); // call manualy, we have not to wait anything else
+	};
+	oself.recreateButton = function() {
+		t('recreateButton!!!');
+		var file_elm_id = oself.html_obj_id + '_input';
+		try { // try to delete old input if any
+			if(oself.file_elm) {
+				oself.file_elm.parentNode.removeChild(oself.file_elm);
+			}
+		} catch(e) {};
+		oself.file_elm = createElm('input', {
+			id: file_elm_id,
+			type: 'file',
+			multiple: true,
+			accept: oself.opts.accept_fixed ? oself.opts.accept_fixed : ''
+		}, oself.div_elm);
+		css(oself.file_elm, {
+			width: '100%',
+			opacity: 0
+		});
+		oself.file_elm.onchange = function() {
+			oself.onSelect(this); // 'this' is a DOM object here
+		}
 	};
 	oself.onSelect = function(obj) {
 		for(var i = 0; i < obj.files.length; i++) {
@@ -471,6 +518,7 @@ var upFE_html5 = function(opts) {
 			fo.calc_hash_state = CALC_HASH_NOTSTARTED;
 			oself.broadcast('onSelect', fo);
 		}
+		oself.recreateButton(); // recreate button to avoid second files upload during form posting in case of button is inside form
 	};
 	oself.addFile = function(fo) {
 		upFE_html5.superclass.addFile.apply(oself, [fo]);
@@ -735,11 +783,25 @@ var upFE_flash = function(opts) {
 	var nver = 9.28; // needed flash version
 
 	oself.insert = function() {
-		oself.opts.container.innerHTML += '<object id="' + oself.html_obj_id + '" type="application/x-shockwave-flash" data="' + oself.opts.plugin_url + '" width="' + oself.opts.width + '" height="' + oself.opts.height + '">' +
-			'<param name="movie" value="' + oself.opts.plugin_url + '" />' +
-			'<param name="flashvars" value="uploaderID=' + oself.uploader_idx + '&frontentID=' + oself.frontend_idx + '&htmlProxyName=lwu&browseText=' + oself.opts.buttonText + '&buttonURL=' + oself.opts.buttonURL + '&accept=' + oself.getAcceptString() + '" />' +
-			'<param name="allowscriptaccess" value="always" />' +
-			'</object>';
+		var obj = createElm('object', {
+			id: oself.html_obj_id,
+			type: 'application/x-shockwave-flash',
+			data: oself.opts.plugin_url,
+			width: oself.opts.width,
+			height: oself.opts.height
+		}, oself.opts.container);
+		createElm('param', {
+			name: 'movie',
+			value: oself.opts.plugin_url
+		}, obj);
+		createElm('param', {
+			name: 'allowscriptaccess',
+			value: 'always'
+		}, obj);
+		createElm('param', {
+			name: 'flashvars',
+			value: 'uploaderID=' + oself.uploader_idx + '&frontentID=' + oself.frontend_idx + '&htmlProxyName=lwu&browseText=' + oself.opts.buttonText + '&buttonURL=' + oself.opts.buttonURL + '&accept=' + oself.getAcceptString()
+		}, obj);
 	};
 	oself.isFEAvailable = function() {
 		var version;
@@ -776,6 +838,7 @@ var upFE_silverlight = function(opts) {
 	var nver = '3.0.40818.0'; // needed sl version
 
 	oself.insert = function() {
+/*
 		oself.opts.container.innerHTML += '<object id="' + oself.html_obj_id + '" data="data:application/x-silverlight," type="application/x-silverlight-2" width="' + oself.opts.width + '" height="' + oself.opts.height + '">' +
 			'<param name="source" value="' + oself.opts.plugin_url + '" />' +
 			'<param name="minRuntimeVersion" value="' + nver + '" />' +
@@ -783,6 +846,34 @@ var upFE_silverlight = function(opts) {
 			'<param name="autoUpgrade" value="true" />' +
 			'<param name="initParams" value="uploaderID=' + oself.uploader_idx + ',frontentID=' + oself.frontend_idx + ',htmlProxyName=lwu,browseText=' + oself.opts.buttonText + ',buttonURL=' + oself.opts.buttonURL + ',accept=' + oself.getAcceptString() + '" />' +
 			'</object>';
+*/
+		var obj = createElm('object', {
+			id: oself.html_obj_id,
+			type: 'application/x-silverlight-2',
+			data: 'data:application/x-silverlight,',
+			width: oself.opts.width,
+			height: oself.opts.height
+		}, oself.opts.container);
+		createElm('param', {
+			name: 'source',
+			value: oself.opts.plugin_url
+		}, obj);
+		createElm('param', {
+			name: 'minRuntimeVersion',
+			value: nver
+		}, obj);
+		createElm('param', {
+			name: 'enableHtmlAccess',
+			value: true
+		}, obj);
+		createElm('param', {
+			name: 'autoUpgrade',
+			value: true
+		}, obj);
+		createElm('param', {
+			name: 'initParams',
+			value: 'uploaderID=' + oself.uploader_idx + ',frontentID=' + oself.frontend_idx + ',htmlProxyName=lwu,browseText=' + oself.opts.buttonText + ',buttonURL=' + oself.opts.buttonURL + ',accept=' + oself.getAcceptString()
+		}, obj);
 	};
 	oself.isFEAvailable = function() {
 		var rv = false;
