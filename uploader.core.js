@@ -228,6 +228,7 @@ lwu = {
 				}
 				oself.startNextUpload();
 			});
+			return oself;
 		};
 		oself.chooseFE = function(fe) {
 			if(!oself.initTimer) {
