@@ -124,6 +124,15 @@ var adler32 = function(data) {
 	return s2 * Math.pow(2, 16) + s1;
 };
 
+// convert string version like 9.0.124 to number 9.0000000124 where each position after dot is replaced by zero-padded 5 digits
+var sver2nver = function(sver) {
+	var aver = sver.match(/\d+/g);
+	var nver = parseInt(aver.shift());
+	for(var i = 0, s; s = aver[i++];) {
+		nver += s * Math.pow(0.00001, i);
+	}
+	return nver;
+};
 // main object
 lwu = {
 	instances: {}, // uploader instances
@@ -781,7 +790,7 @@ var upFE_flash = function(opts) {
 	oself.codename = 'flash';
 	override(oself.opts, opts);
 
-	var nver = 9.28; // needed flash version
+	var needed_ver = '9.0.28';
 
 	oself.insert = function() {
 		var obj = createElm('object', {
@@ -813,11 +822,10 @@ var upFE_flash = function(opts) {
 			try {
 				version = new ActiveXObject('ShockwaveFlash.ShockwaveFlash').GetVariable('$version');
 			} catch (e2) {
-				version = '0.0';
+				version = '0.0.00';
 			}
 		}
-		version = version.match(/\d+/g);
-		return parseFloat(version[0] + '.' + version[1]) >= nver;
+		return sver2nver(version) >= sver2nver(needed_ver);
 	};
 	oself.onFEReady = function() {
 		oself.plugin_api = gebi(oself.html_obj_id);
@@ -836,18 +844,9 @@ var upFE_silverlight = function(opts) {
 	oself.codename = 'silverlight';
 	override(oself.opts, opts);
 
-	var nver = '3.0.40818.0'; // needed sl version
+	var needed_ver = '3.0.40818.0'; // needed sl version
 
 	oself.insert = function() {
-/*
-		oself.opts.container.innerHTML += '<object id="' + oself.html_obj_id + '" data="data:application/x-silverlight," type="application/x-silverlight-2" width="' + oself.opts.width + '" height="' + oself.opts.height + '">' +
-			'<param name="source" value="' + oself.opts.plugin_url + '" />' +
-			'<param name="minRuntimeVersion" value="' + nver + '" />' +
-			'<param name="enableHtmlAccess" value="true" />' +
-			'<param name="autoUpgrade" value="true" />' +
-			'<param name="initParams" value="uploaderID=' + oself.uploader_idx + ',frontentID=' + oself.frontend_idx + ',htmlProxyName=lwu,browseText=' + oself.opts.buttonText + ',buttonURL=' + oself.opts.buttonURL + ',accept=' + oself.getAcceptString() + '" />' +
-			'</object>';
-*/
 		var obj = createElm('object', {
 			id: oself.html_obj_id,
 			type: 'application/x-silverlight-2',
@@ -861,7 +860,7 @@ var upFE_silverlight = function(opts) {
 		}, obj);
 		createElm('param', {
 			name: 'minRuntimeVersion',
-			value: nver
+			value: needed_ver
 		}, obj);
 		createElm('param', {
 			name: 'enableHtmlAccess',
@@ -880,15 +879,13 @@ var upFE_silverlight = function(opts) {
 		var rv = false;
 		try {
 			var ver = navigator.plugins['Silverlight Plug-In'];
-			// here we assume that silverlight version has fixed digits in each position
-			// i.e. version 4.0.50917.0 has one digit at first pos, one digit at second pos, five digits at third pos and one digit at fourth pos
-			if(parseInt(ver.description.replace(/\./g, '')) >= parseInt(nver.replace(/\./g, ''))) {
+			if(sver2nver(ver.description) >= sver2nver(needed_ver)) {
 				rv = true;
 			}
 		} catch (e1) {
 			try {
 				sl = new ActiveXObject('AgControl.AgControl');
-				if(sl.IsVersionSupported(nver)) {
+				if(sl.IsVersionSupported(needed_ver)) {
 					rv = true;
 				}
 			} catch (e2) {}
