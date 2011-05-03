@@ -426,6 +426,7 @@ var upFE_html5 = function(opts) {
 	upFE_html5.superclass.constructor.apply(this); // call upFE constructor
 
 	oself.codename = 'html5';
+	oself.blobSliceFixed = false; // special flag to indicate whether Blob.prototype.slice method already match new semantics
 
 	oself.opts.minChunkSize = 50 * 1024;
 	oself.opts.maxChunkSize = 500 * 1024;
@@ -468,7 +469,7 @@ var upFE_html5 = function(opts) {
 	};
 
 	oself.isFEAvailable = function() {
-		if(wnd.File && wnd.FileList && (wnd.Blob || wnd.FormData)) {
+		if(wnd.File && wnd.FileList && wnd.XMLHttpRequestUpload && (wnd.Blob || wnd.FormData)) { // check File, XmlHttpRequest2 and Blob or FormData existance
 			return true;
 		}
 		return false;
@@ -517,6 +518,10 @@ var upFE_html5 = function(opts) {
 		}
 	};
 	oself.onSelect = function(obj) {
+		if(oself.blobSliceFixed == false) { // call once to fix slice method
+			oself.fixBlobSlice(obj.files);
+			oself.blobSliceFixed = true;
+		}
 		for(var i = 0; i < obj.files.length; i++) {
 			var fo = obj.files[i];
 			fo.id = fo.sessionID = Math.round(Math.random() * 100000000);
@@ -528,7 +533,52 @@ var upFE_html5 = function(opts) {
 			fo.calc_hash_state = CALC_HASH_NOTSTARTED;
 			oself.broadcast('onSelect', fo);
 		}
-		oself.recreateButton(); // recreate button to avoid second files upload during form posting in case of button is inside form
+		oself.recreateButton(); // recreate button to avoid second upload during form posting in case of button is inside form
+	};
+	oself.fixBlobSlice = function(files) {
+		if(wnd.Blob) {
+			var origBlobSlice, origFileSlice, test_blob;
+			if(Blob.prototype.slice) { // method exists, let's check it
+				if(wnd.BlobBuilder) {
+					test_blob = (new BlobBuilder()).append("abc").getBlob();
+				} else { // use bad method: find file for test where filesize is at least 3 bytes!!!
+				    for (var i = 0, f; f = files[i++];) {
+						if(f.size > 2) {
+							test_blob = f;
+							break;
+						}
+					}
+				}
+				if(test_blob && test_blob.slice(1, 1).size != 0) { // slice is an old-semantic slice
+					origBlobSlice = Blob.prototype.slice;
+					Blob.prototype.slice = function(start, end, contentType) {
+						return origBlobSlice.apply(this, [start, end - start, contentType]);
+					}
+					if(File.prototype.slice !== Blob.prototype.slice) { // this is needed for Firefox 4.0.0
+						origFileSlice = File.prototype.slice;
+						File.prototype.slice = function(start, end, contentType) {
+							return origFileSlice.apply(this, [start, end - start, contentType]);
+						}
+					}
+				}
+			} else if(Blob.prototype.webkitSlice || Blob.prototype.mozSlice) { // new-semantic function, just use it
+				/*
+				// We can't do like this because of in FF we get exception "Illegal operation on WrappedNative prototype object" while calling fake slice method
+				origBlobSlice = Blob.prototype.webkitSlice || Blob.prototype.mozSlice;
+				Blob.prototype.slice = function(start, end, contentType) {
+					return origBlobSlice.apply(this, [start, end, contentType]);
+				}
+				*/
+				if(Blob.prototype.webkitSlice) {
+					origBlobSlice = 'webkitSlice';
+				} else if(Blob.prototype.mozSlice) {
+					origBlobSlice = 'mozSlice';
+				}
+				Blob.prototype.slice = function(start, end, contentType) {
+					return this[origBlobSlice].apply(this, [start, end, contentType]);
+				}
+			}
+		}
 	};
 	oself.addFile = function(fo) {
 		upFE_html5.superclass.addFile.apply(oself, [fo]);
@@ -557,18 +607,20 @@ var upFE_html5 = function(opts) {
 		fo.retry--;
 		if(fo.retry > 0) {
 			var timeout = oself.opts.retryTimeoutBase * (oself.opts.maxChunkRetries - fo.retry);
-			setTimeout(function(){oself.uploadFile(fo)}, timeout);
+			setTimeout(function() {
+				oself.uploadFile(fo);
+			}, timeout);
 		} else {
-			oself.broadcast('onError', fo. lwu.ERROR_CODES.OTHER_ERROR);
+			oself.broadcast('onError', fo, lwu.ERROR_CODES.OTHER_ERROR);
 		}
 	};
 	oself.uploadFile = function(fo) {
 		oself.calcNextChunkRange(fo);
 		var blob, simple_upload = 0;
 		try {
-			blob = fo.slice(fo.currentChunkStartPos, fo.currentChunkEndPos - fo.currentChunkStartPos + 1);
+			blob = fo.slice(fo.currentChunkStartPos, fo.currentChunkEndPos + 1);
 		} catch(e) { // Safari doesn't support Blob.slice method
-			blob = new FormData();
+			blob = new FormData(); // FormData should exists - this was checked in isFEAvailable method
 			blob.append('Filedata', fo);
 			simple_upload = 1;
 		};
@@ -695,7 +747,7 @@ var upFE_html5 = function(opts) {
 				current_point = oself.opts.numPoints; // artificially break calculation loop
 				do_calc();
 			};
-			r.readAsBinaryString(fo.slice(file_pos, part_size));
+			r.readAsBinaryString(fo.slice(file_pos, file_pos + part_size));
 		};
 		if(!wnd.FileReader) {
 			current_point = oself.opts.numPoints; // artificially break calculation loop
