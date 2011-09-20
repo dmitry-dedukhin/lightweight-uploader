@@ -27,11 +27,11 @@ var css = function(elm, props) {
 
 var createElm = function(tag, props, append_to) {
 	var elm = document.createElement(tag);
+	if(append_to) {
+		elm = append_to.appendChild(elm);
+	}
 	if(props) {
 		attr(elm, props);
-	}
-	if(append_to) {
-		append_to.appendChild(elm);
 	}
 	return elm;
 };
@@ -376,7 +376,7 @@ upFE.prototype.insert = function() {
 	alert('insert() method is not implemented');
 };
 upFE.prototype.onFEReady = function() {
-	t('upFE: onFEReady, codename=' + this.codename);
+	//t('upFE: onFEReady, codename=' + this.codename);
 	this.init_result = FE_INIT_SUCCESS;
 	this.broadcast('onInit', this);
 };
@@ -496,7 +496,6 @@ var upFE_html5 = function(opts) {
 		oself.onFEReady(); // call manualy, we have not to wait anything else
 	};
 	oself.recreateButton = function() {
-		t('recreateButton!!!');
 		var file_elm_id = oself.html_obj_id + '_input';
 		try { // try to delete old input if any
 			if(oself.file_elm) {
@@ -845,17 +844,23 @@ var upFE_flash = function(opts) {
 	var needed_ver = '9.0.28';
 
 	oself.insert = function() {
-		var obj = createElm('object', {
-			id: oself.html_obj_id,
-			type: 'application/x-shockwave-flash',
-			data: oself.opts.plugin_url,
-			width: oself.opts.width,
-			height: oself.opts.height
-		}, oself.opts.container);
-		createElm('param', {
-			name: 'movie',
-			value: oself.opts.plugin_url
-		}, obj);
+		var obj;
+		if(window.ActiveXObject) { // fucking IE9, I should insert flash object using innerHTML, see http://pipwerks.com/2011/05/30/using-the-object-element-to-dynamically-embed-flash-swfs-in-internet-explorer/
+			oself.opts.container.innerHTML += '<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" id="' + oself.html_obj_id + '" width="' + oself.opts.width + '" height="' + oself.opts.height + '"><param name="movie" value="' + oself.opts.plugin_url + '"></object';
+			obj = oself.opts.container.lastChild;
+		} else {
+			obj = createElm('object', {
+				id: oself.html_obj_id,
+				type: 'application/x-shockwave-flash',
+				data: oself.opts.plugin_url,
+				width: oself.opts.width,
+				height: oself.opts.height
+			}, oself.opts.container);
+			createElm('param', {
+				name: 'movie',
+				value: oself.opts.plugin_url
+			}, obj);
+		}
 		createElm('param', {
 			name: 'allowscriptaccess',
 			value: 'always'
